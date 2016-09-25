@@ -1,4 +1,4 @@
-package me.choco.game.utils.output;
+package me.choco.game.io;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

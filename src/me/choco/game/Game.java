@@ -42,12 +42,13 @@ import org.lwjgl.opengl.GL;
 import me.choco.game.entities.Camera;
 import me.choco.game.entities.Entity;
 import me.choco.game.entities.generic.Light;
+import me.choco.game.io.Keyboard;
+import me.choco.game.io.Screenshot;
 import me.choco.game.models.RawModel;
 import me.choco.game.models.TexturedModel;
 import me.choco.game.models.textures.ModelTexture;
 import me.choco.game.utils.Loader;
 import me.choco.game.utils.modelling.OBJLoader;
-import me.choco.game.utils.output.Screenshot;
 import me.choco.game.utils.rendering.MasterRenderer;
 
 public class Game {
@@ -56,8 +57,6 @@ public class Game {
 	
 	private long window;
 	public static final int WIDTH = 720, HEIGHT = 480;
-	
-	private final boolean[] keys = new boolean[1024];
 
 	private MasterRenderer renderer;
 	private final Loader loader = new Loader();
@@ -89,7 +88,7 @@ public class Game {
 
 		glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
 			if (action == GLFW_PRESS){
-				this.keys[key] = true;
+				Keyboard.keys[key] = true;
 				
 				// Screenshot key
 				if (key == GLFW_KEY_F2){
@@ -104,7 +103,7 @@ public class Game {
 				}
 			}
 			else if (action == GLFW_RELEASE)
-				this.keys[key] = false;
+				Keyboard.keys[key] = false;
 		});
 
 		GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -140,25 +139,25 @@ public class Game {
 		
 		renderer = new MasterRenderer();
 		while (!glfwWindowShouldClose(window)) {
-			if (this.isKeyPressed(GLFW_KEY_R))
+			if (Keyboard.isKeyPressed(GLFW_KEY_R))
 				entity.increaseRotation(0, 1, 0);
 			
 			// Handle key values
 			float speed = camera.getSpeed();
-			if (this.isKeyPressed(GLFW_KEY_W))
+			if (Keyboard.isKeyPressed(GLFW_KEY_W))
 				camera.getPosition().z -= speed;
-			if (this.isKeyPressed(GLFW_KEY_D))
+			if (Keyboard.isKeyPressed(GLFW_KEY_D))
 				camera.getPosition().x += speed;
-			if (this.isKeyPressed(GLFW_KEY_A))
+			if (Keyboard.isKeyPressed(GLFW_KEY_A))
 				camera.getPosition().x -= speed;
-			if (this.isKeyPressed(GLFW_KEY_S))
+			if (Keyboard.isKeyPressed(GLFW_KEY_S))
 				camera.getPosition().z += speed;
-			if (this.isKeyPressed(GLFW_KEY_SPACE))
+			if (Keyboard.isKeyPressed(GLFW_KEY_SPACE))
 				camera.getPosition().y += speed;
-			if (this.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
+			if (Keyboard.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
 				camera.getPosition().y -= speed;
 			
-			if (this.isKeyPressed(GLFW_KEY_ESCAPE))
+			if (Keyboard.isKeyPressed(GLFW_KEY_ESCAPE))
 				break;
 			
 			/* Start Render */
@@ -176,29 +175,6 @@ public class Game {
 		
 		renderer.cleanShader();
 		loader.clearBufferData();
-	}
-	
-	// KEY UTILITIES
-	public boolean isKeyPressed(int key){
-		return keys[key];
-	}
-	
-	public boolean areKeysPressed(int... keys){
-		boolean allPressed = true;
-		for (int key : keys)
-			if (isKeyReleased(key)) allPressed = false;
-		return allPressed;
-	}
-	
-	public boolean isKeyReleased(int key){
-		return !keys[key];
-	}
-	
-	public boolean areKeysReleased(int... keys){
-		boolean allReleased = true;
-		for (int key : keys)
-			if (isKeyPressed(key)) allReleased = false;
-		return allReleased;
 	}
 
 	public static void main(String[] args) { new Game(); }
