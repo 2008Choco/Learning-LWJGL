@@ -1,9 +1,11 @@
 package me.choco.learning;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import me.choco.learning.engine.Window;
 import me.choco.learning.engine.camera.Camera;
+import me.choco.learning.engine.light.PointLight;
 import me.choco.learning.engine.model.ObjectModel;
 import me.choco.learning.engine.model.VertexModel;
 import me.choco.learning.engine.rendering.Renderer;
@@ -26,6 +28,8 @@ public class LearningRenderer implements Renderer {
 	private ShaderProgram shaderProgram;
 	private TransformationMatrices transformation = new TransformationMatrices();
 	
+	private final PointLight light = new PointLight(new Vector3f(0, -2, -3), new Vector3f(1, 1, 1));
+	
 	public LearningRenderer(Window window, Camera camera) {
 		this.window = window;
 		this.camera = camera;
@@ -43,11 +47,12 @@ public class LearningRenderer implements Renderer {
 		// Vertex shader uniforms
 		this.shaderProgram.createUniformVariable("projectionMatrix");
 		this.shaderProgram.createUniformVariable("modelViewMatrix");
+		this.shaderProgram.createUniformVariable("transformationMatrix");
+		this.shaderProgram.createUniformVariable("lightPosition");
 		
 		// Fragment shader uniforms
 		this.shaderProgram.createUniformVariable("textureSampler");
-		this.shaderProgram.createUniformVariable("colour");
-		this.shaderProgram.createUniformVariable("useColour");
+		this.shaderProgram.createUniformVariable("lightColour");
 	}
 	
 	@Override
@@ -55,17 +60,19 @@ public class LearningRenderer implements Renderer {
 		this.shaderProgram.bind();
 		
 		this.shaderProgram.setUniformValue("projectionMatrix", transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR));
+		this.shaderProgram.setUniformValue("lightPosition", light.getPosition());
 		this.shaderProgram.setUniformValue("textureSampler", 0);
+		this.shaderProgram.setUniformValue("lightColour", light.getColour());
 		
 		Matrix4f viewMatrix = transformation.getViewMatrix(camera);
 		
 		// Render models
 		for (ObjectModel model : models) {
 			VertexModel vertexModel = model.getVertexModel();
+			Matrix4f transformationMatrix = transformation.getTransformationMatrix(model);
 			
-			this.shaderProgram.setUniformValue("modelViewMatrix", transformation.getModelViewMatrix(model, viewMatrix));
-			this.shaderProgram.setUniformValue("colour", vertexModel.getColour());
-			this.shaderProgram.setUniformValue("useColour", !vertexModel.hasTexture());
+			this.shaderProgram.setUniformValue("modelViewMatrix", viewMatrix.mul(transformationMatrix));
+			this.shaderProgram.setUniformValue("transformationMatrix", transformationMatrix);
 			vertexModel.render();
 		}
 		

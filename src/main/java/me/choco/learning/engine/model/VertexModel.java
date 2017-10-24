@@ -11,7 +11,6 @@ import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 import me.choco.learning.engine.buffer.VAO;
@@ -30,7 +29,6 @@ public class VertexModel {
 	private final VBO vertexBuffer, indicesBuffer, textureCoordsBuffer, normalsBuffer;
 	
 	private Material material = new Material(); // Default empty material
-	private Vector3f colour = new Vector3f(1, 1, 1); // Default white
 	
 	private final int vertexCount;
 	
@@ -88,25 +86,6 @@ public class VertexModel {
 	}
 	
 	/**
-	 * Set the colour of this model. The colour will be used when rendering the
-	 * model if no texture has been set
-	 * 
-	 * @param colour the colour to set
-	 */
-	public void setColour(Vector3f colour) {
-		this.colour = colour;
-	}
-	
-	/**
-	 * Get the colour of this model
-	 * 
-	 * @return the model colour
-	 */
-	public Vector3f getColour() {
-		return colour;
-	}
-	
-	/**
 	 * Set the material that should be rendered on this vertex model
 	 * 
 	 * @param material the material to be set
@@ -146,7 +125,7 @@ public class VertexModel {
 		this.vao.enableAllAttribArrays();
 		
 		glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
-
+		
 		this.vao.disableAllAttribArrays();
 		this.vao.unbind();
 	}

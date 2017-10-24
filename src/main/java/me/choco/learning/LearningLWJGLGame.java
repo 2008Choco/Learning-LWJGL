@@ -51,9 +51,8 @@ public class LearningLWJGLGame extends GameLogicController {
 		this.renderer.init();
 		this.mouseInput.init(window);
         
-	    this.model = new ObjectModel(ModelLoader.loadOBJModel("/models/cube.obj", new Material(new Texture("/textures/cube_texture.png"))));
+	    this.model = new ObjectModel(ModelLoader.loadOBJModel("/models/bunny.obj", new Material(new Texture("/textures/cube_texture.png"))));
 	    this.model.setPosition(0, 0, -2);
-	    this.model.setScale(0.1f);
 	}
 	
 	@Override

@@ -45,17 +45,20 @@ public class TransformationMatrices {
 	 * @return the resulting model view matrix
 	 */
 	public Matrix4f getModelViewMatrix(ObjectModel model, Matrix4f viewMatrix) {
+		Matrix4f transformationMatrix = getTransformationMatrix(model);
+		Matrix4f viewCurrent = new Matrix4f(viewMatrix);
+		return viewCurrent.mul(transformationMatrix);
+	}
+	
+	public Matrix4f getTransformationMatrix(ObjectModel model) {
 		Vector3f rotation = model.getRotation();
 		
-		this.modelViewMatrix.identity()
+		return this.modelViewMatrix.identity()
 			.translate(model.getPosition())
 			.rotateX((float) Math.toRadians(-rotation.x))
 			.rotateY((float) Math.toRadians(-rotation.y))
 			.rotateZ((float) Math.toRadians(-rotation.z))
 			.scale(model.getScale());
-		
-		Matrix4f viewCurrent = new Matrix4f(viewMatrix);
-		return viewCurrent.mul(modelViewMatrix);
 	}
 	
 	/**
