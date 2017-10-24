@@ -13,6 +13,7 @@ import static org.lwjgl.opengl.GL30.*;
  */
 public class VAO {
 	
+	private int attributePointers;
 	private final int id;
 	
 	/**
@@ -30,6 +31,7 @@ public class VAO {
 	 */
 	public void createAttribPointer(int index, int size) {
 		glVertexAttribPointer(index, size, GL_FLOAT, false, 0, 0);
+		this.attributePointers++;
 	}
 	
 	/**
@@ -42,12 +44,30 @@ public class VAO {
 	}
 	
 	/**
+	 * Enable all available attribute arrays in this VAO
+	 */
+	public void enableAllAttribArrays() {
+		for (int i = 0; i < attributePointers; i++) {
+			glEnableVertexAttribArray(i);
+		}
+	}
+	
+	/**
 	 * Disable an attribute array at the given index
 	 * 
 	 * @param index the index of the attribute to disable
 	 */
 	public void disableAttribArray(int index) {
 		glDisableVertexAttribArray(index);
+	}
+	
+	/**
+	 * Disable all available attribute arrays in this VAO
+	 */
+	public void disableAllAttribArrays() {
+		for (int i = 0; i < attributePointers; i++) {
+			glDisableVertexAttribArray(i);
+		}
 	}
 	
 	/**
@@ -69,6 +89,7 @@ public class VAO {
 	 * longer usable
 	 */
 	public void delete() {
+		this.disableAllAttribArrays();
 		glDeleteVertexArrays(id);
 	}
 	

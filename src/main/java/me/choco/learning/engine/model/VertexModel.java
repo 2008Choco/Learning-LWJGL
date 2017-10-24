@@ -139,19 +139,15 @@ public class VertexModel {
 	public void render() {
 		if (material.isTextured()) {
 			glActiveTexture(GL_TEXTURE0);
-			material.getTexture().bind();
+			this.material.getTexture().bind();
 		}
 		
 		this.vao.bind();
-		this.vao.enableAttribArray(0);
-		this.vao.enableAttribArray(1);
-		this.vao.enableAttribArray(2);
+		this.vao.enableAllAttribArrays();
 		
 		glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
 
-		this.vao.disableAttribArray(2);
-		this.vao.disableAttribArray(1);
-		this.vao.disableAttribArray(0);
+		this.vao.disableAllAttribArrays();
 		this.vao.unbind();
 	}
 	
@@ -159,10 +155,6 @@ public class VertexModel {
 	 * Cleanup any outstanding data
 	 */
 	public void cleanup() {
-		this.vao.disableAttribArray(0);
-		this.vao.disableAttribArray(1);
-		this.vao.disableAttribArray(2);
-		
 		this.vertexBuffer.delete();
 		this.indicesBuffer.delete();
 		this.textureCoordsBuffer.delete();
