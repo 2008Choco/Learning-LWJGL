@@ -34,8 +34,6 @@ public class LearningRenderer implements Renderer {
 		this.window = window;
 		this.camera = camera;
 		this.shaderProgram = new ShaderProgram();
-		
-		this.init(); // TODO: Have this called internally, not in the constructor
 	}
 	
 	@Override

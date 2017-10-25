@@ -1,5 +1,6 @@
 package me.choco.learning.engine;
 
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -155,6 +156,16 @@ public class Window {
 	 */
 	public void hide() {
 		glfwHideWindow(id);
+	}
+	
+	/**
+	 * Hide and destroy this window entirely, as well as free all
+	 * assigned callbacks
+	 */
+	public void destroy() {
+		glfwHideWindow(id);
+		glfwFreeCallbacks(id);
+		glfwDestroyWindow(id);
 	}
 	
 	/**

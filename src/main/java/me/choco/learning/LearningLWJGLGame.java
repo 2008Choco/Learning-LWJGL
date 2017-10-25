@@ -1,6 +1,5 @@
 package me.choco.learning;
 
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -32,9 +31,7 @@ public class LearningLWJGLGame extends GameLogicController {
 	public void init() {
 		if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
 		
-		this.window = new Window("Learning LWJGL", 1080, 640);
-		this.window.setAsActiveContext();
-		this.window.show();
+		this.setWindowContext(new Window("Learning LWJGL", 1080, 640));
 		
 		// Initialize OpenGL
 		GL.createCapabilities();
@@ -42,15 +39,14 @@ public class LearningLWJGLGame extends GameLogicController {
 		glEnable(GL_DEPTH_TEST);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 		
+		// Declare necessary variables for logic controller
 		this.setVSync(VSYNC);
 		this.setMaxFPS(MAX_FPS);
 		this.setMaxUPS(MAX_UPS);
-		
-		// Initialize necessary variables
-		this.renderer = new LearningRenderer(window, camera);
-		this.renderer.init();
+		this.initRenderer(new LearningRenderer(window, camera));
 		this.mouseInput.init(window);
         
+		// Initialize the object model... temp
 	    this.model = new ObjectModel(ModelLoader.loadOBJModel("/models/bunny.obj", new Material(new Texture("/textures/cube_texture.png"))));
 	    this.model.setPosition(0, 0, -2);
 	}
@@ -111,9 +107,8 @@ public class LearningLWJGLGame extends GameLogicController {
 	public void cleanup() {
 		this.renderer.cleanup();
 		this.model.cleanup();
+		this.window.destroy();
 		
-		glfwFreeCallbacks(window.getId());
-		glfwDestroyWindow(window.getId());
 		glfwTerminate();
 	}
 	
