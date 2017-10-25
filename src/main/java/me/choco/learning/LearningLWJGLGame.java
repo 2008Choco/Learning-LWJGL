@@ -101,6 +101,12 @@ public class LearningLWJGLGame extends GameLogicController {
 		} else if (window.isKeyPressed(GLFW_KEY_SPACE)) {
 			this.cameraDelta.y = 1;
 		}
+		
+		if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
+			this.camera.getRotation().y -= 5;
+		} else if (window.isKeyPressed(GLFW_KEY_LEFT)) {
+			this.camera.getRotation().y += 5;
+		}
 	}
 	
 	@Override
