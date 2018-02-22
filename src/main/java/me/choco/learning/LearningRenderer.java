@@ -26,7 +26,6 @@ public class LearningRenderer implements Renderer {
 	private Window window;
 	private Camera camera;
 	private ShaderProgram shaderProgram;
-	private TransformationMatrices transformation = new TransformationMatrices();
 	
 	private final PointLight light = new PointLight(new Vector3f(0, -2, -3), new Vector3f(1, 1, 1));
 	
@@ -44,8 +43,8 @@ public class LearningRenderer implements Renderer {
 		
 		// Vertex shader uniforms
 		this.shaderProgram.createUniformVariable("projectionMatrix");
-		this.shaderProgram.createUniformVariable("modelViewMatrix");
 		this.shaderProgram.createUniformVariable("transformationMatrix");
+		this.shaderProgram.createUniformVariable("viewMatrix");
 		this.shaderProgram.createUniformVariable("lightPosition");
 		
 		// Fragment shader uniforms
@@ -57,20 +56,20 @@ public class LearningRenderer implements Renderer {
 	public void render(ObjectModel... models) {
 		this.shaderProgram.bind();
 		
-		this.shaderProgram.setUniformValue("projectionMatrix", transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR));
+		this.shaderProgram.setUniformValue("projectionMatrix", TransformationMatrices.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR));
 		this.shaderProgram.setUniformValue("lightPosition", light.getPosition());
 		this.shaderProgram.setUniformValue("textureSampler", 0);
 		this.shaderProgram.setUniformValue("lightColour", light.getColour());
 		
-		Matrix4f viewMatrix = transformation.getViewMatrix(camera);
+		Matrix4f viewMatrix = TransformationMatrices.getViewMatrix(camera);
 		
 		// Render models
 		for (ObjectModel model : models) {
 			VertexModel vertexModel = model.getVertexModel();
-			Matrix4f transformationMatrix = transformation.getTransformationMatrix(model);
+			Matrix4f transformationMatrix = TransformationMatrices.getTransformationMatrix(model);
 			
-			this.shaderProgram.setUniformValue("modelViewMatrix", viewMatrix.mul(transformationMatrix));
 			this.shaderProgram.setUniformValue("transformationMatrix", transformationMatrix);
+			this.shaderProgram.setUniformValue("viewMatrix", viewMatrix);
 			vertexModel.render();
 		}
 		

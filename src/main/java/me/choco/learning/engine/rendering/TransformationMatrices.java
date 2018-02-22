@@ -7,53 +7,50 @@ import me.choco.learning.engine.camera.Camera;
 import me.choco.learning.engine.model.ObjectModel;
 
 /**
- * A class that holds information on various types of matrices including
- * projection, view and model view matrices. Applies respective transformation
- * based on the provided values in order to constantly update them when
- * required
+ * A utility class intended to simplify the calculation of various core OpenGL
+ * matrices including projection, transformation and view matrices without having
+ * to remember linear algebra concepts
  * 
  * @author Parker Hawke - 2008Choco
  */
-public class TransformationMatrices {
+public final class TransformationMatrices {
 	
-	private final Matrix4f projectionMatrix = new Matrix4f(), viewMatrix = new Matrix4f(), modelViewMatrix = new Matrix4f();
+	private static final Matrix4f MATRIX_PROJECTION = new Matrix4f(), MATRIX_VIEW = new Matrix4f(), MATRIX_MODEL_VIEW = new Matrix4f();
+
+	private TransformationMatrices() {}
 	
 	/**
-	 * Modify and get the projection matrix based on given values
+	 * Modify and get the projection matrix based on given values. A projection matrix
+	 * projects 2D space onto a 3D environment with various environmental parameters
+	 * including field of view (FOV), screen width and height as well as the nearest
+	 * and farthest z position to render
 	 * 
 	 * @param fov the FOV of the projection matrix
-	 * @param width the width of the framebuffer
-	 * @param height the height of the framebuffer
+	 * @param width the width of the frame buffer
+	 * @param height the height of the frame buffer
 	 * @param zNear the nearest view distance on the projection matrix
 	 * @param zFar the further view distance on the projection matrix
 	 * 
 	 * @return the resulting projection matrix
 	 */
-	public Matrix4f getProjectionMatrix(float fov, float width, float height, float zNear, float zFar) {
-		this.projectionMatrix.identity()
-			.perspective(fov, width / height, zNear, zFar);
-		return projectionMatrix;
+	public static Matrix4f getProjectionMatrix(float fov, float width, float height, float zNear, float zFar) {
+		return MATRIX_PROJECTION.identity().perspective(fov, width / height, zNear, zFar);
 	}
 	
 	/**
-	 * Get the model view matrix for a given object model which reflects
-	 * its position, rotation and scale in the world
+	 * Get the transformation matrix of a given model. A transformation matrix reflects
+	 * an objects position, rotation and scale relative to its original values. i.e. if a
+	 * model is positioned at (1, 1, 1), is rotated 90 degrees and has a scale of 0.5, this
+	 * matrix will reflect those values from it's original position of (0, 0, 0), rotation
+	 * of 0 and scale of 1
 	 * 
-	 * @param model the model to reflect changes for
-	 * @param viewMatrix the view matrix to multiply with
-	 * 
-	 * @return the resulting model view matrix
+	 * @param model the model whose transformation matrix to calculate
+	 * @return the calculated transformation matrix
 	 */
-	public Matrix4f getModelViewMatrix(ObjectModel model, Matrix4f viewMatrix) {
-		Matrix4f transformationMatrix = getTransformationMatrix(model);
-		Matrix4f viewCurrent = new Matrix4f(viewMatrix);
-		return viewCurrent.mul(transformationMatrix);
-	}
-	
-	public Matrix4f getTransformationMatrix(ObjectModel model) {
+	public static Matrix4f getTransformationMatrix(ObjectModel model) {
 		Vector3f rotation = model.getRotation();
 		
-		return this.modelViewMatrix.identity()
+		return MATRIX_MODEL_VIEW.identity()
 			.translate(model.getPosition())
 			.rotateX((float) Math.toRadians(-rotation.x))
 			.rotateY((float) Math.toRadians(-rotation.y))
@@ -62,19 +59,19 @@ public class TransformationMatrices {
 	}
 	
 	/**
-	 * Get the view matrix for the given camera
+	 * Get the view matrix for the given camera. A view matrix reflects the camera's
+	 * perspective in the world including its position and rotation
 	 * 
-	 * @param camera the camera perspective
-	 * @return the resulting view matrix
+	 * @param camera the camera perspective whose view matrix to calculate
+	 * @return the calculated view matrix
 	 */
-	public Matrix4f getViewMatrix(Camera camera) {
+	public static Matrix4f getViewMatrix(Camera camera) {
 		Vector3f position = camera.getPosition(), rotation = camera.getRotation();
 		
-		this.viewMatrix.identity()
-			.rotate((float) Math.toRadians(rotation.x), new Vector3f(1, 0, 0))
-			.rotate((float) Math.toRadians(rotation.y), new Vector3f(0, 1, 0))
+		return MATRIX_VIEW.identity()
+			.rotateX((float) Math.toRadians(rotation.x))
+			.rotateY((float) Math.toRadians(rotation.y))
 			.translate(-position.x, -position.y, -position.z);
-		return viewMatrix;
 	}
 	
 }
