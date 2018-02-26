@@ -1,5 +1,6 @@
 package me.choco.learning.engine.rendering;
 
+import java.nio.FloatBuffer;
 import java.util.List;
 
 import me.choco.learning.engine.model.ObjectModel;
@@ -35,6 +36,14 @@ public interface Renderer {
 	 * @param models all models to render
 	 */
 	public void render(List<ObjectModel> models);
+	
+	/**
+	 * Render a raw float buffer to the LWJGL framebuffer
+	 * 
+	 * @param buffer the buffer to render
+	 * @param bufferSize the size of the buffer
+	 */
+	public void render(FloatBuffer buffer, int bufferSize);
 	
 	/**
 	 * Clean up any outstanding information in the renderer including the

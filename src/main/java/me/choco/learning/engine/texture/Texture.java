@@ -1,6 +1,14 @@
 package me.choco.learning.engine.texture;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_UNPACK_ALIGNMENT;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glPixelStorei;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 import java.io.IOException;
@@ -18,6 +26,7 @@ import me.choco.learning.engine.model.VertexModel;
 public class Texture {
 	
 	private int id = -1;
+	private int width, height;
 	
 	/**
 	 * Construct a new texture and read its png data from the provided file name
@@ -33,14 +42,36 @@ public class Texture {
 			buffer.flip();
 			
 			this.id = glGenTextures();
+			this.width = decoder.getWidth();
+			this.height = decoder.getHeight();
+			
 			glBindTexture(GL_TEXTURE_2D, id);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(), decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Construct a new texture based off of raw buffer data
+	 * 
+	 * @param buffer the buffer data to create a texture from
+	 * @param width the expected width of the texture
+	 * @param height the expected height of the texture
+	 */
+	public Texture(ByteBuffer buffer, int width, int height) {
+		this.id = glGenTextures();
+		this.width = width;
+		this.height = height;
+		
+		glBindTexture(GL_TEXTURE_2D, id);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	
 	/**
@@ -50,6 +81,24 @@ public class Texture {
 	 */
 	public int getId() {
 		return id;
+	}
+	
+	/**
+	 * Get the width of this texture
+	 * 
+	 * @return this texture width
+	 */
+	public int getWidth() {
+		return width;
+	}
+	
+	/**
+	 * Get the height of this texture
+	 * 
+	 * @return the texture height
+	 */
+	public int getHeight() {
+		return height;
 	}
 	
 	/**

@@ -1,5 +1,9 @@
 package me.choco.learning;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
+
+import java.nio.FloatBuffer;
 import java.util.List;
 
 import org.joml.Matrix4f;
@@ -39,6 +43,9 @@ public class LearningRenderer implements Renderer {
 	
 	@Override
 	public void init() {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
 		this.shaderProgram.loadShader(ShaderType.FRAGMENT, "/shaders/fragment.fs");
 		this.shaderProgram.loadShader(ShaderType.VERTEX, "/shaders/vertex.vs");
 		this.shaderProgram.link();
@@ -76,6 +83,12 @@ public class LearningRenderer implements Renderer {
 		}
 		
 		this.shaderProgram.unbind();
+	}
+	
+	@Override
+	public void render(FloatBuffer buffer, int bufferSize) {
+		glActiveTexture(GL_TEXTURE0);
+		glDrawElements(GL_TRIANGLES, bufferSize, GL_UNSIGNED_INT, 0);
 	}
 	
 	@Override
