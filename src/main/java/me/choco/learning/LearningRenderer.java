@@ -1,5 +1,7 @@
 package me.choco.learning;
 
+import java.util.List;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -53,7 +55,7 @@ public class LearningRenderer implements Renderer {
 	}
 	
 	@Override
-	public void render(ObjectModel... models) {
+	public void render(List<ObjectModel> models) {
 		this.shaderProgram.bind();
 		
 		this.shaderProgram.setUniformValue("projectionMatrix", TransformationMatrices.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR));

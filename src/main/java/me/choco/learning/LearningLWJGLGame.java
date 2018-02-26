@@ -93,7 +93,7 @@ public class LearningLWJGLGame extends GameBase {
 	
 	@Override
 	public void cleanup() {
-		this.renderer.cleanup();
+		super.cleanup();
 		this.model.cleanup();
 		this.window.destroy();
 	}

@@ -29,8 +29,8 @@ public abstract class GameBase {
 	private boolean running = true;
 	
 	protected Window window;
-	protected Renderer renderer;
-	private final List<ObjectModel> renderQueue = new ArrayList<>(); // Clean this up... I hate this
+	private Renderer renderer;
+	private final List<ObjectModel> renderQueue = new ArrayList<>();
 	
 	protected Camera camera = new Camera();
 	protected final Vector3f cameraDelta = new Vector3f();
@@ -118,9 +118,17 @@ public abstract class GameBase {
 	public void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		this.renderer.render(renderQueue.toArray(new ObjectModel[renderQueue.size()])); // TODO: Ew
+		this.renderer.render(renderQueue);
 		
 		glfwSwapBuffers(window.getId());
+	}
+	
+	/**
+	 * Cleanup any outstanding data that should be cleared before the engine halts.
+	 * Called once at the end of the game loop
+	 */
+	public void cleanup() {
+		this.renderer.cleanup();
 	}
 	
 	/**
@@ -130,6 +138,22 @@ public abstract class GameBase {
 	 */
 	public void addToRenderQueue(ObjectModel model) {
 		this.renderQueue.add(model);
+	}
+	
+	/**
+	 * Remove the specified model from the render queue
+	 * 
+	 * @param model the model to remove
+	 */
+	public void removeFromRenderQueue(ObjectModel model) {
+		this.renderQueue.remove(model);
+	}
+	
+	/**
+	 * Clear all models from the render queue
+	 */
+	public void clearRenderQueue() {
+		this.renderQueue.clear();
 	}
 	
 	/**
@@ -150,15 +174,6 @@ public abstract class GameBase {
 	protected void initRenderer(Renderer renderer) {
 		this.renderer = renderer;
 		this.renderer.init();
-	}
-	
-	/**
-	 * Set the renderer implementation to use without invoking its init method
-	 * 
-	 * @param renderer the renderer to set
-	 */
-	protected void setRenderer(Renderer renderer) {
-		this.renderer = renderer;
 	}
 	
 	/**
@@ -243,11 +258,5 @@ public abstract class GameBase {
 	 * Handle the game input. Called according to {@link #getMaxUPS()}
 	 */
 	public abstract void handleInput();
-	
-	/**
-	 * Cleanup any outstanding data that should be cleared before the engine halts.
-	 * Called once at the end of the game loop
-	 */
-	public abstract void cleanup();
 	
 }

@@ -1,5 +1,7 @@
 package me.choco.learning.engine.rendering;
 
+import java.util.List;
+
 import me.choco.learning.engine.model.ObjectModel;
 
 public interface Renderer {
@@ -32,7 +34,7 @@ public interface Renderer {
 	 * 
 	 * @param models all models to render
 	 */
-	public void render(ObjectModel... models);
+	public void render(List<ObjectModel> models);
 	
 	/**
 	 * Clean up any outstanding information in the renderer including the
