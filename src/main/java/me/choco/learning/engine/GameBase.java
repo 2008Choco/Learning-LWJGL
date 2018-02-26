@@ -1,12 +1,20 @@
 package me.choco.learning.engine;
 
-import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.opengl.GL11.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL;
 
 import me.choco.learning.engine.camera.Camera;
 import me.choco.learning.engine.camera.CameraMouseInput;
+import me.choco.learning.engine.model.ObjectModel;
 import me.choco.learning.engine.rendering.Renderer;
 
 /**
@@ -15,29 +23,42 @@ import me.choco.learning.engine.rendering.Renderer;
  * protected methods. Failure to initialize a field in the {@link #init()} method
  * may result in a runtime exception
  */
-public abstract class GameLogicController {
+public abstract class GameBase {
 	
-	protected boolean vsync = false;
-	protected int maxFPS, maxUPS;
 	protected int currentFPS, currentUPS;
-	
 	private boolean running = true;
+	
 	protected Window window;
 	protected Renderer renderer;
+	private final List<ObjectModel> renderQueue = new ArrayList<>(); // Clean this up... I hate this
 	
 	protected Camera camera = new Camera();
 	protected final Vector3f cameraDelta = new Vector3f();
 	protected final CameraMouseInput mouseInput = new CameraMouseInput();
 	
-	private final String title;
+	private final GameConfig config;
 	
 	/**
 	 * Construct a new GameLogicController and provide it with a game title
 	 * 
-	 * @param title the title of the game. Will be displayed on the window
+	 * @param config the game's configuration
 	 */
-	public GameLogicController(String title) {
-		this.title = title;
+	public GameBase(GameConfig config) {
+		if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
+		
+		// Declare and initialize configuration
+		this.config = config;
+		this.window = config.constructNewWindow();
+		
+		// Initialize OpenGL contexts
+		GL.createCapabilities();
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+		
+		// Initialize game-specific features
+		this.mouseInput.init(window);
+		
 		this.init();
 		this.run();
 	}
@@ -46,7 +67,7 @@ public abstract class GameLogicController {
 		long startTime = System.currentTimeMillis();
 		long lastTimeUPS = System.nanoTime(), lastTimeFPS = System.nanoTime();
 		double deltaFPS = 0.0, deltaUPS = 0.0;
-		double nsFPS = 1_000_000_000.0 / maxFPS, nsUPS = 1_000_000_000.0 / maxUPS;
+		double nsFPS = 1_000_000_000.0 / config.getMaxFPS(), nsUPS = 1_000_000_000.0 / config.getMaxUPS();
 		
 		while (running) {
 			// Game updates
@@ -57,6 +78,8 @@ public abstract class GameLogicController {
 			if (deltaUPS >= 1.0) {
 				this.update();
 				this.handleInput();
+				this.config.updateGameState(this);
+				
 				this.currentUPS++;
 				deltaUPS--;
 			}
@@ -75,7 +98,7 @@ public abstract class GameLogicController {
 			// FPS and UPS display
 			if (System.currentTimeMillis() - startTime > 1000) {
 				startTime += 1000;
-				this.window.setTitle(title + " - (FPS: " + this.currentFPS + " | UPS: " + this.currentUPS + ")");
+				this.window.setTitle(config.getTitle() + " - (FPS: " + this.currentFPS + " | UPS: " + this.currentUPS + ")");
 				this.currentUPS = 0;
 				this.currentFPS = 0;
 			}
@@ -86,6 +109,36 @@ public abstract class GameLogicController {
 		}
 
 		this.cleanup();
+		glfwTerminate();
+	}
+	
+	/**
+	 * Render the game to the screen. Called according to {@link #getMaxFPS()}
+	 */
+	public void render() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		this.renderer.render(renderQueue.toArray(new ObjectModel[renderQueue.size()])); // TODO: Ew
+		
+		glfwSwapBuffers(window.getId());
+	}
+	
+	/**
+	 * Add the specified model to the render queue to be rendered
+	 * 
+	 * @param model the model to render
+	 */
+	public void addToRenderQueue(ObjectModel model) {
+		this.renderQueue.add(model);
+	}
+	
+	/**
+	 * Get this game's configuration
+	 * 
+	 * @return the configuration
+	 */
+	public GameConfig getConfig() {
+		return this.config;
 	}
 	
 	/**
@@ -156,60 +209,6 @@ public abstract class GameLogicController {
 	}
 	
 	/**
-	 * Set whether vsync should be used or not
-	 * 
-	 * @param vsync true if vsync should be used. false otherwise
-	 */
-	protected void setVSync(boolean vsync) {
-		glfwSwapInterval((this.vsync = vsync) ? 1 : 0);
-	}
-	
-	/**
-	 * Check whether vsync is being used in this current context or not
-	 * 
-	 * @return true if vsync is enabled, false otherwise
-	 */
-	public boolean isVsync() {
-		return vsync;
-	}
-	
-	/**
-	 * Set the maximum FPS cap to be used when rendering this game
-	 * 
-	 * @param maxFPS the new maximum FPS
-	 */
-	protected void setMaxFPS(int maxFPS) {
-		this.maxFPS = maxFPS;
-	}
-	
-	/**
-	 * Get the maximum amount of FPS for this game
-	 * 
-	 * @return the maximum FPS
-	 */
-	public int getMaxFPS() {
-		return maxFPS;
-	}
-	
-	/**
-	 * Set the maximum UPS cap (updates) to be used when updating this game
-	 * 
-	 * @param maxUPS the new maximum UPS
-	 */
-	protected void setMaxUPS(int maxUPS) {
-		this.maxUPS = maxUPS;
-	}
-	
-	/**
-	 * Get the maximum amount of UPS for this game
-	 * 
-	 * @return the maximum UPS
-	 */
-	public int getMaxUPS() {
-		return maxUPS;
-	}
-	
-	/**
 	 * Get the current FPS as of invoking this method
 	 * 
 	 * @return the current FPS
@@ -239,11 +238,6 @@ public abstract class GameLogicController {
 	 * {@link #getMaxUPS()}
 	 */
 	public abstract void update();
-	
-	/**
-	 * Render the game to the screen. Called according to {@link #getMaxFPS()}
-	 */
-	public abstract void render();
 	
 	/**
 	 * Handle the game input. Called according to {@link #getMaxUPS()}
